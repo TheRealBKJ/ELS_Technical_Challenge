@@ -1,6 +1,29 @@
-{
-
-}
-
+[
+  { "ticker": "VSMPX", "name": "Vanguard Total Stock Market Index Fund; Institutional Plus" },
+  { "ticker": "FXAIX", "name": "Fidelity 500 Index Fund" },
+  { "ticker": "VFIAX", "name": "Vanguard 500 Index Fund; Admiral" },
+  { "ticker": "VTSAX", "name": "Vanguard Total Stock Market Index Fund; Admiral" },
+  { "ticker": "SPAXX", "name": "Fidelity Government Money Market Fund" },
+  { "ticker": "VMFXX", "name": "Vanguard Federal Money Market Fund; Investor" },
+  { "ticker": "VGTSX", "name": "Vanguard Total International Stock Index Fund; Investor" },
+  { "ticker": "SWVXX", "name": "Schwab Prime Advantage Money Fund; Inv" },
+  { "ticker": "FDRXX", "name": "Fidelity Government Cash Reserves" },
+  { "ticker": "FGTXX", "name": "Goldman Sachs FS Government Fund; Institutional" },
+  { "ticker": "OGVXX", "name": "JPMorgan US Government Money Market Fund; Capital" },
+  { "ticker": "FCTDX", "name": "Fidelity Strategic Advisers Fidelity US Total Stk" },
+  { "ticker": "VIIIX", "name": "Vanguard Institutional Index Fund; Inst Plus" },
+  { "ticker": "FRGXX", "name": "Fidelity Instl Government Portfolio; Institutional" },
+  { "ticker": "VTBNX", "name": "Vanguard Total Bond Market II Index Fund; Institutional" },
+  { "ticker": "MVRXX", "name": "Morgan Stanley Inst Liq Government Port; Institutional" },
+  { "ticker": "TFDXX", "name": "BlackRock Liquidity FedFund; Institutional" },
+  { "ticker": "GVMXX", "name": "State Street US Government Money Market Fund; Prem" },
+  { "ticker": "AGTHX", "name": "American Funds Growth Fund of America; A" },
+  { "ticker": "VTBIX", "name": "Vanguard Total Bond Market II Index Fund; Investor" },
+  { "ticker": "CJTXX", "name": "JPMorgan 100% US Treasury Securities Money Market Fund; Capital" },
+  { "ticker": "TTTXX", "name": "BlackRock Liquidity Treasury Trust Fund; Institutional" },
+  { "ticker": "FCNTX", "name": "Fidelity Contrafund" },
+  { "ticker": "SNAXX", "name": "Schwab Prime Advantage Money Fund; Ultra" },
+  { "ticker": "PIMIX", "name": "PIMCO Income Fund; Institutional" }
+]
 
 

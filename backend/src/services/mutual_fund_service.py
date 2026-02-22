@@ -8,7 +8,7 @@ MUTUAL_FUND_DATA = Path(__file__).resolve().parent.parent / "data" / "mutual_fun
 
 
 def get_all_mutual_funds():
-    with open(DATA_PATH, "r") as f:
+    with open(MUTUAL_FUND_DATA, "r") as f:
         return json.load(f)
 
 

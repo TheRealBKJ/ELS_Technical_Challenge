@@ -41,6 +41,7 @@
 .positive { color: var(--green); }
 .negative { color: var(--red); }
 
+/* Meta grid */
 .metaGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -77,7 +78,7 @@
 
 /* Progress bar */
 .progressSection {
-  margin-bottom: 28px;
+  margin-bottom: 40px;
 }
 
 .progressLabels {
@@ -114,8 +115,175 @@
   color: var(--muted);
 }
 
+.chartWrap {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.chartLabel {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chartLabel::before {
+  content: '';
+  width: 16px;
+  height: 1px;
+  background: var(--gold);
+  display: block;
+}
+
+/* SVG fills its container width, fixed height via viewBox */
+.svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+.legend {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.6rem;
+  color: var(--muted);
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendValue {
+  font-family: var(--font-mono);
+  color: var(--text);
+  margin-left: 4px;
+}
+
+.diffCallout {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.diffLabel {
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.diffValue {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.compareBtn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition);
+  margin-top: 8px;
+}
+
+.compareBtn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.compareSection {
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  background: var(--surface2);
+}
+
+.compareHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition);
+}
+
+.closeBtn:hover {
+  color: var(--text);
+}
+
+.compareSelect {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  padding: 14px 16px;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color var(--transition);
+  margin-bottom: 24px;
+}
+
+.compareSelect:focus,
+.compareSelect:hover {
+  border-color: var(--gold);
+}
+
 @media (max-width: 600px) {
   .metaGrid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .diffCallout {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

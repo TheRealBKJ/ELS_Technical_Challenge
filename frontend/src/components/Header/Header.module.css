@@ -1,0 +1,55 @@
+.header {
+  border-bottom: 1px solid var(--border);
+  padding: 0 48px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: rgba(10, 12, 15, 0.92);
+  backdrop-filter: blur(12px);
+  z-index: 100;
+}
+.logo {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  letter-spacing: 0.02em;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.logoMark {
+  width: 26px; height: 26px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+  flex-shrink: 0;
+}
+.nav { display: flex; gap: 2px; }
+.navLink {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--transition), background var(--transition), border-color var(--transition);
+  white-space: nowrap;
+}
+.navLink:hover { color: var(--text); background: var(--surface); }
+.navLink.active {
+  color: var(--gold);
+  background: rgba(201, 168, 76, 0.08);
+  border-color: rgba(201, 168, 76, 0.2);
+}
+@media (max-width: 900px) {
+  .header { padding: 0 20px; }
+  .navLink { padding: 5px 8px; font-size: 0.6rem; }
+  .logo { font-size: 1.1rem; }
+}

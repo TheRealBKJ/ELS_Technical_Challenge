@@ -1,7 +1,15 @@
 import React from 'react';
 import styles from './Header.module.css';
 
-export default function Header() {
+const NAV = [
+  { id: 'calculator', label: 'Calculator' },
+  { id: 'allocation', label: 'Portfolio Builder' },
+  { id: 'report',     label: 'Projection Report' },
+  { id: 'whatif',     label: 'Scenario Lab' },
+  { id: 'ai',         label: 'AI Advisor' },
+];
+
+export default function Header({ page, onNavigate }) {
   return (
     <header className={styles.header}>
       <div className={styles.logo}>
@@ -9,9 +17,15 @@ export default function Header() {
         Mutual Fund Calculator
       </div>
       <nav className={styles.nav}>
-        <a href="#link1">additional</a>
-        <a href="#link2">features?</a>
-        <a href="#link3">goals?</a>
+        {NAV.map(n => (
+          <button
+            key={n.id}
+            className={`${styles.navLink} ${page === n.id ? styles.active : ''}`}
+            onClick={() => onNavigate(n.id)}
+          >
+            {n.label}
+          </button>
+        ))}
       </nav>
     </header>
   );

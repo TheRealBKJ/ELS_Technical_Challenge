@@ -1,4 +1,4 @@
-import requests 
+import requests
 from fastapi import HTTPException
 from src.config import (
     NEWTON_BETA_URL,
@@ -7,28 +7,30 @@ from src.config import (
     NEWTON_OBSERVATIONS
 )
 
-
-
 def get_beta(ticker:str) -> float:
-    params ={
+    params = {
         "ticker": ticker,
         "index": NEWTON_INDEX,
         "interval": NEWTON_INTERVAL,
         "observations": NEWTON_OBSERVATIONS
     }
     try:
-        response = requests.get(NEWTON_BETA_URL, params= params)
-        
-
-    except requests.RequestException:
+        response = requests.get(NEWTON_BETA_URL, params=params, timeout=10)
+        response.raise_for_status()
+    except requests.RequestException as exc:
         raise HTTPException(
             status_code=502,
             detail="Failed to fetch beta from Newton Analytics API."
-        )
+        ) from exc
 
-    data = response.json()
+    try:
+        data = response.json()
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="Received an invalid response from Newton Analytics API."
+        ) from exc
 
-    #cant find data for ticker
     if "data" not in data or "beta" not in data["data"]:
         raise HTTPException(
             status_code=404,
@@ -42,7 +44,6 @@ def get_beta(ticker:str) -> float:
             status_code=500,
             detail="Invalid beta format received from API."
         )
-
 
 
 

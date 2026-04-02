@@ -1,25 +1,32 @@
-import yfinance as yf
 from fastapi import HTTPException
 
 
-def get_expected_market_return(ticker: str) -> float:
+def get_expected_return_rate(ticker: str) -> float:
     """
     Calculates last year's return using monthly close prices:
     return = (end_price - start_price) / start_price
     """
 
     try:
+        import yfinance as yf
+    except ImportError as exc:
+        raise HTTPException(
+            status_code=500,
+            detail="yfinance is not installed in the backend environment."
+        ) from exc
+
+    try:
         data = yf.download(
             ticker,
             period="1y",
             interval="1mo",
-            progress=False
+            progress=False,
         )
-    except Exception:
+    except Exception as exc:
         raise HTTPException(
             status_code=502,
-            detail="Failed to fetch historical market data."
-        )
+            detail="Failed to fetch historical mutual fund data."
+        ) from exc
 
     if data.empty or len(data) < 2:
         raise HTTPException(

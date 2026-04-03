@@ -1,61 +1,64 @@
 .page {
   animation: fadeUp 0.6s ease both;
 }
- 
-/* Title block */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Title ── */
 .titleBlock {
   margin-bottom: 48px;
 }
- 
+
 .title {
   font-family: var(--font-display);
-  font-size: 3rem;
+  font-size: clamp(2rem, 4vw, 3.2rem);
   font-weight: 700;
-  color: var(--text);
   line-height: 1.1;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
- 
-.gold {
+
+.accent {
   color: var(--gold);
 }
- 
+
 .subtitle {
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   letter-spacing: 0.02em;
 }
- 
-/* Two column layout: form on left, results on right */
+
+/* ── Two column layout ── */
 .layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
   align-items: start;
 }
- 
-/* Shared card style - matches CalculatorPage cards */
+
+/* ── Form card ── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 32px;
 }
- 
-/* Form fields */
+
 .field {
   margin-bottom: 28px;
 }
- 
+
 .label {
   display: block;
-  font-size: 0.55rem;
+  font-size: 0.68rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
   margin-bottom: 10px;
 }
- 
+
 .select,
 .input {
   width: 100%;
@@ -64,43 +67,39 @@
   border-radius: var(--radius-md);
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   padding: 14px 16px;
-  transition: border-color var(--transition);
-  appearance: none;
   outline: none;
+  appearance: none;
+  transition: border-color var(--transition);
 }
- 
+
 .select:hover,
-.input:hover {
-  border-color: var(--border-hover);
-}
- 
+.input:hover,
 .select:focus,
 .input:focus {
   border-color: var(--gold);
 }
- 
-/* Dollar sign prefix on investment input */
+
 .inputWrapper {
   position: relative;
 }
- 
+
 .prefix {
   position: absolute;
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--muted);
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   pointer-events: none;
 }
- 
+
 .inputWrapper .input {
   padding-left: 28px;
 }
- 
-/* Range slider */
+
+/* ── Slider ── */
 .slider {
   width: 100%;
   appearance: none;
@@ -111,7 +110,7 @@
   cursor: pointer;
   margin-bottom: 10px;
 }
- 
+
 .slider::-webkit-slider-thumb {
   appearance: none;
   width: 18px;
@@ -121,20 +120,19 @@
   cursor: pointer;
   transition: transform var(--transition);
 }
- 
+
 .slider::-webkit-slider-thumb:hover {
   transform: scale(1.2);
 }
- 
+
 .sliderTicks {
   display: flex;
   justify-content: space-between;
-  font-size: 0.5rem;
+  font-size: 0.65rem;
   color: var(--muted);
-  letter-spacing: 0.05em;
 }
- 
-/* Analyze button */
+
+/* ── Button ── */
 .button {
   width: 100%;
   background: var(--gold);
@@ -142,7 +140,7 @@
   border: none;
   border-radius: var(--radius-md);
   font-family: var(--font-body);
-  font-size: 0.55rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -151,36 +149,35 @@
   transition: opacity var(--transition), transform var(--transition);
   margin-top: 8px;
 }
- 
+
 .button:hover:not(:disabled) {
   opacity: 0.9;
   transform: translateY(-1px);
 }
- 
+
 .button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
- 
-/* Error message */
+
+/* ── Error ── */
 .error {
   color: var(--red);
-  font-size: 0.55rem;
+  font-size: 0.68rem;
   margin-bottom: 12px;
   padding: 12px;
   background: rgba(224, 85, 85, 0.08);
   border: 1px solid rgba(224, 85, 85, 0.2);
   border-radius: var(--radius-sm);
 }
- 
-/* Results pane */
+
+/* ── Results pane ── */
 .resultsPane {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
- 
-/* Empty / loading state */
+
 .emptyState {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -188,17 +185,16 @@
   padding: 64px 32px;
   text-align: center;
   color: var(--muted);
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   line-height: 1.8;
 }
- 
+
 .emptyIcon {
   font-size: 2rem;
   color: var(--border);
   margin-bottom: 16px;
 }
- 
-/* Loading spinner */
+
 .spinner {
   width: 32px;
   height: 32px;
@@ -208,39 +204,41 @@
   animation: spin 0.8s linear infinite;
   margin: 0 auto 20px;
 }
- 
-/* Result cards */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Result cards ── */
 .results {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
- 
+
 .resultCard {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 28px;
+  animation: fadeUp 0.4s ease both;
 }
- 
-/* Big projected value number */
+
 .bigNumber {
   font-family: var(--font-display);
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 4vw, 3rem);
   color: var(--green);
   margin-bottom: 6px;
 }
- 
+
 .subLine {
-  font-size: 0.55rem;
+  font-size: 0.68rem;
   color: var(--muted);
   margin-bottom: 20px;
 }
- 
-.green {
-  color: var(--green);
-}
- 
+
+.green { color: var(--green); }
+
 /* Progress bar */
 .barTrack {
   height: 6px;
@@ -249,49 +247,48 @@
   overflow: hidden;
   margin-bottom: 8px;
 }
- 
-.barInitial {
+
+.barFill {
   height: 100%;
-  background: var(--gold);
+  background: linear-gradient(90deg, var(--gold), var(--green));
   border-radius: 3px;
-  transition: width 1s ease;
 }
- 
+
 .barLabels {
   display: flex;
   justify-content: space-between;
-  font-size: 0.5rem;
+  font-size: 0.65rem;
   color: var(--muted);
+  font-family: var(--font-mono);
 }
- 
-/* Individual fund rows */
+
+/* Fund rows */
 .fundRow {
   margin-bottom: 20px;
 }
- 
+
 .fundRow:last-child {
   margin-bottom: 0;
 }
- 
+
 .fundHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
 }
- 
+
 .fundName {
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   color: var(--text);
 }
- 
+
 .fundPct {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   color: var(--gold);
 }
- 
-/* Fund allocation bar */
+
 .allocTrack {
   height: 4px;
   background: var(--surface2);
@@ -299,37 +296,32 @@
   overflow: hidden;
   margin-bottom: 8px;
 }
- 
+
 .allocBar {
   height: 100%;
   background: linear-gradient(90deg, var(--gold), var(--gold-light));
   border-radius: 2px;
-  transition: width 1s ease;
 }
- 
+
 .fundStats {
   display: flex;
   gap: 16px;
-  font-size: 0.5rem;
+  font-size: 0.65rem;
   color: var(--muted);
   font-family: var(--font-mono);
 }
- 
-/* AI reasoning text */
+
+/* AI reasoning */
 .reasoning {
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   color: var(--muted);
   line-height: 1.8;
   font-style: italic;
 }
- 
-/* Responsive */
+
+/* ── Responsive ── */
 @media (max-width: 768px) {
   .layout {
     grid-template-columns: 1fr;
-  }
- 
-  .title {
-    font-size: 2rem;
   }
 }

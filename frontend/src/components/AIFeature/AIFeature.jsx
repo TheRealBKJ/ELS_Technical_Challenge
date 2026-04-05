@@ -17,7 +17,41 @@ function formatCurrency(value) {
   return '$' + Math.round(value).toLocaleString('en-US');
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+function riskBetaGuidance(risk) {
+  if (risk === 'Low') {
+    return 'Weighted-average portfolio beta must be < 0.80. Prefer holdings with individual beta < 0.80.';
+  }
+  if (risk === 'High') {
+    return 'Weighted-average portfolio beta must be > 1.10. Include meaningful weight in funds with individual beta > 1.10.';
+  }
+  return 'Weighted-average portfolio beta should fall near 1.00 (use roughly 0.85–1.15).';
+}
+
+function horizonGuidance(years) {
+  if (years <= 5) {
+    return 'Time horizon 1–5 years: within the risk band, bias toward the lower-beta names (less recovery time).';
+  }
+  if (years >= 20) {
+    return 'Time horizon 20+ years: within the risk band, you may allocate more to higher-beta growth names (long horizon).';
+  }
+  return 'Time horizon 6–19 years: meet the risk-tier beta targets without extra short/long tilt.';
+}
+
+function goalGuidance(goal) {
+  switch (goal) {
+    case 'Growth':
+      return 'Goal Growth: maximize exposure to higher-beta funds consistent with the risk tier (e.g. PRGFX, AGTHX, FCNTX where allowed).';
+    case 'Capital Preservation':
+      return 'Goal Capital Preservation: overweight VWELX (beta 0.72) and funds with beta < 0.85; avoid large weights in beta > 1.10.';
+    case 'Income':
+      return 'Goal Income: balanced mix of moderate-beta equity and defensive sleeves; avoid a single-beta cluster.';
+    case 'Balanced':
+      return 'Goal Balanced: hold at least two distinct beta levels (defensive ~0.72–0.95 and core/growth ~1.00–1.15).';
+    default:
+      return 'Align fund weights with the stated goal and the beta rules above.';
+  }
+}
+
 export default function AIFeature() {
   const [riskTolerance, setRiskTolerance] = useState('');
   const [amount, setAmount]               = useState('');
@@ -26,6 +60,7 @@ export default function AIFeature() {
   const [result, setResult]               = useState(null);
   const [loading, setLoading]             = useState(false);
   const [error, setError]                 = useState('');
+  const [notes, setNotes]                 = useState([]);
 
   async function handleAnalyze() {
     // Validate inputs
@@ -55,41 +90,54 @@ export default function AIFeature() {
     // Then use liveFunds instead of FUNDS in the prompt below.
 
     const fundList = FUNDS.map(
-      f => `- ${f.name} (${f.ticker}): Beta ${f.beta}, Expected Return ${(calcExpectedReturn(f.beta) * 100).toFixed(2)}%`
+      f => `- ${f.ticker}: ${f.name} | β=${f.beta.toFixed(2)} | CAPM E(r)=${(calcExpectedReturn(f.beta) * 100).toFixed(2)}%`
     ).join('\n');
 
-    const prompt = `
-You are a professional portfolio analyst at Goldman Sachs.
+    const riskLine = riskBetaGuidance(riskTolerance);
+    const horizonLine = horizonGuidance(years);
+    const goalLine = goalGuidance(goal);
 
-A client has the following profile:
-- Risk Tolerance: ${riskTolerance}
-- Initial Investment: $${amount}
-- Time Horizon: ${years} years
-- Investment Goal: ${goal}
+    const prompt = `You are a portfolio analyst. Output must follow CAPM-style logic using the betas below (Rf=${(RISK_FREE_RATE * 100).toFixed(2)}%, Rm=${(MARKET_RETURN * 100).toFixed(2)}%).
 
-Available mutual funds:
+CLIENT (numeric targets apply):
+- Risk tolerance: ${riskTolerance} → ${riskLine}
+- Investment horizon: ${years} years → ${horizonLine}
+- Goal: ${goal} → ${goalLine}
+- Initial investment: $${amount} (for context only)
+
+${notes ? `- Additional context from client: "${notes}"` : ''}
+
+FUNDS (only these tickers; β = beta vs market):
 ${fundList}
 
-Based on this profile, recommend a portfolio using 2-4 of these funds.
+DIVERSIFICATION (mandatory):
+- Use 2–4 funds. Do not pick only similar betas (e.g. three funds all near β≈1.0) unless Low risk + preservation forces it.
+- When appropriate for the risk tier and goal, include international diversification using DODFX (name contains International).
+- Include international exposure (DODFX) where it makes sense for the client
+- Percentages must add up to exactly 100
 
-Respond ONLY with a valid JSON object in exactly this format, no other text, no markdown:
+REASONING (mandatory style):
+- In "reasoning", write 4–6 sentences. For EACH fund you allocate, name the ticker, state its β to two decimals, and one clause on why that weight fits risk/goal/horizon (tradeoff in plain English).
+- For each fund you pick, mention its name, how risky it is compared to the market, and in plain English why it fits this client's situation
+- Explain the tradeoff: what the client gains and what they give up with each choice
+- If the client gave additional context, reference it directly so they feel heard
+- No raw numbers like "beta = 1.08" in the reasoning — say "slightly more volatile 
+  than the market" instead
+
+OUTPUT: Valid JSON only, no markdown:
 {
-  "allocations": [
-    { "ticker": "FXAIX", "percentage": 60 },
-    { "ticker": "VWELX", "percentage": 40 }
-  ],
-  "reasoning": "2-3 sentences explaining why this portfolio suits the client."
+  "allocations": [ { "ticker": "TICKER", "percentage": <integer 1-99> } ],
+  "reasoning": "<string as above>"
 }
 
-Rules:
-- Percentages must add up to exactly 100
-- Only use tickers from the list above
-- Match risk tolerance: Low = low beta funds, High = high beta funds
+CONSTRAINTS:
+- allocation percentages are integers summing to exactly 100
+- tickers must appear exactly as listed above
+- Portfolio must satisfy the weighted-average beta target for ${riskTolerance} risk together with horizon and goal above
     `;
 
     try {
-      // ── Call Gemini API ───────────────────────────────────────────────────
-      // Key: frontend/.env or .env.local as VITE_GEMINI_API_KEY (Vite exposes via import.meta.env)
+      
       const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
       if (!apiKey) {
         throw new Error(
@@ -108,8 +156,8 @@ Rules:
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: {
-              temperature: 0.7,
-              // Ask Gemini to respond in JSON mode for cleaner output
+              temperature: 0.45,
+       
               responseMimeType: 'application/json',
             },
           }),
@@ -123,18 +171,11 @@ Rules:
 
       const data = await response.json();
 
-      // Extract text from Gemini response
       const raw = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!raw) throw new Error('Empty response from Gemini');
 
-      // Strip any accidental markdown fences just in case
       const cleaned = raw.replace(/```json|```/g, '').trim();
       const parsed  = JSON.parse(cleaned);
-
-      // ── Enrich allocations with fund data and math ────────────────────────
-      // TODO: When backend is connected, replace calcExpectedReturn(fund.beta)
-      // with the expectedReturn value returned from GET /api/mutual-funds
-      // so we use real market beta instead of hardcoded values.
 
       const enriched = parsed.allocations.map(alloc => {
         const fund = FUNDS.find(f => f.ticker === alloc.ticker);
@@ -147,7 +188,6 @@ Rules:
         return { ...alloc, ...fund, expectedReturn, invested, futureValue };
       });
 
-      // Verify percentages add up to 100
       const totalPct = enriched.reduce((sum, f) => sum + f.percentage, 0);
       if (Math.abs(totalPct - 100) > 1) throw new Error('Allocations do not add up to 100%');
 
@@ -173,7 +213,6 @@ Rules:
   return (
     <div className={styles.page}>
 
-      {/* ── Page title ── */}
       <div className={styles.titleBlock}>
         <h1 className={styles.title}>
           AI Portfolio <span className={styles.accent}>Advisor</span>
@@ -185,7 +224,6 @@ Rules:
 
       <div className={styles.layout}>
 
-        {/* ── Left: input form ── */}
         <div className={styles.card}>
           <div className="card-label">Your Profile</div>
 
@@ -251,7 +289,19 @@ Rules:
             </div>
           </div>
 
+          <div className={styles.field}>
+            <label className={styles.label}>Additional Context (optional)</label>
+            <textarea
+              className={styles.textarea}
+              placeholder="e.g. I may need early access to funds, I'm concerned about inflation, I already hold bonds elsewhere..."
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              rows={3}
+            />
+          </div>                 
+
           {error && <p className={styles.error}>{error}</p>}
+
 
           <button
             className={styles.button}
@@ -262,7 +312,6 @@ Rules:
           </button>
         </div>
 
-        {/* ── Right: results ── */}
         <div className={styles.resultsPane}>
 
           {!result && !loading && (
@@ -282,7 +331,6 @@ Rules:
           {result && (
             <div className={styles.results}>
 
-              {/* Total projected value */}
               <div className={styles.resultCard}>
                 <div className="card-label">Projected Return</div>
                 <div className={styles.bigNumber}>
@@ -296,7 +344,6 @@ Rules:
                   &nbsp;·&nbsp;{years} years
                 </div>
 
-                {/* Progress bar */}
                 <div className={styles.barTrack}>
                   <div
                     className={styles.barFill}
@@ -309,7 +356,6 @@ Rules:
                 </div>
               </div>
 
-              {/* Fund allocation breakdown */}
               <div className={styles.resultCard}>
                 <div className="card-label">Allocation Breakdown</div>
                 {result.allocations.map(fund => (
@@ -334,8 +380,6 @@ Rules:
                   </div>
                 ))}
               </div>
-
-              {/* AI reasoning */}
               <div className={styles.resultCard}>
                 <div className="card-label">AI Reasoning</div>
                 <p className={styles.reasoning}>{result.reasoning}</p>

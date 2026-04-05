@@ -9,7 +9,7 @@ const NAV = [
   { id: 'ai',         label: 'AI Advisor' },
 ];
 
-export default function Header({ page, onNavigate }) {
+export default function Header({ page, onNavigate, onGlossary }) {
   return (
     <header className={styles.header}>
       <div className={styles.logo}>
@@ -26,6 +26,7 @@ export default function Header({ page, onNavigate }) {
             {n.label}
           </button>
         ))}
+        <button className={styles.glossaryBtn} onClick={onGlossary} title="Glossary">?</button>
       </nav>
     </header>
   );

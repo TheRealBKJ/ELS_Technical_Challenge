@@ -48,6 +48,31 @@
   background: rgba(201, 168, 76, 0.08);
   border-color: rgba(201, 168, 76, 0.2);
 }
+
+.glossaryBtn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--muted);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--transition), color var(--transition);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.glossaryBtn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
 @media (max-width: 900px) {
   .header { padding: 0 20px; }
   .navLink { padding: 5px 8px; font-size: 0.6rem; }

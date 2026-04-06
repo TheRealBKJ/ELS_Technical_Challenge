@@ -35,3 +35,15 @@ export async function calculateFutureValue(payload) {
 
   return handleResponse(response);
 }
+
+export async function getAiPortfolioSuggestion(payload) {
+  const response = await fetch(`${API_BASE_URL}/api/ai/portfolio-suggestion`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return handleResponse(response);
+}

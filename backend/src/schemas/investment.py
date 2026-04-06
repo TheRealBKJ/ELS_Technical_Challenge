@@ -21,3 +21,29 @@ class FutureValueResponse(BaseModel):
     beta: float
     expected_return_rate: float
     future_value: float
+
+
+class PortfolioAdvisorRequest(BaseModel):
+    risk_tolerance: str = Field(..., min_length=1, examples=["Medium"])
+    principal: float = Field(..., gt=0, examples=[10000.0])
+    years: int = Field(..., gt=0, examples=[10])
+    goal: str = Field(..., min_length=1, examples=["Balanced"])
+    notes: str = Field(default="", examples=["I already have bond exposure elsewhere."])
+
+
+class PortfolioAllocationResponse(BaseModel):
+    ticker: str
+    name: str
+    beta: float
+    percentage: int
+    expected_return: float
+    invested: float
+    future_value: float
+
+
+class PortfolioAdvisorResponse(BaseModel):
+    allocations: list[PortfolioAllocationResponse]
+    reasoning: str
+    principal: float
+    totalFV: float
+    totalGain: float

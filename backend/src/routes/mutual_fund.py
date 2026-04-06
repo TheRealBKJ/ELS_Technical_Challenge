@@ -4,7 +4,10 @@ from src.schemas.investment import (
     FutureValueRequest,
     FutureValueResponse,
     MutualFundResponse,
+    PortfolioAdvisorRequest,
+    PortfolioAdvisorResponse,
 )
+from src.services.ai_portfolio_service import generate_portfolio_suggestion
 from src.services.future_performance_calculator_service import (
     calculate_future_performance,
 )
@@ -26,3 +29,17 @@ def get_future_value(payload: FutureValueRequest) -> FutureValueResponse:
         years=payload.years,
     )
     return FutureValueResponse(**result)
+
+
+@router.post("/ai/portfolio-suggestion", response_model=PortfolioAdvisorResponse)
+def get_portfolio_suggestion(
+    payload: PortfolioAdvisorRequest,
+) -> PortfolioAdvisorResponse:
+    result = generate_portfolio_suggestion(
+        risk_tolerance=payload.risk_tolerance,
+        principal=payload.principal,
+        years=payload.years,
+        goal=payload.goal,
+        notes=payload.notes,
+    )
+    return PortfolioAdvisorResponse(**result)

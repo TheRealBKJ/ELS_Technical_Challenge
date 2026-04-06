@@ -277,6 +277,21 @@
   border-color: var(--gold);
 }
 
+.compareStatus,
+.compareError {
+  margin-top: -12px;
+  margin-bottom: 20px;
+  font-size: 0.78rem;
+}
+
+.compareStatus {
+  color: var(--muted);
+}
+
+.compareError {
+  color: #ffb0b0;
+}
+
 @media (max-width: 600px) {
   .metaGrid {
     grid-template-columns: repeat(2, 1fr);

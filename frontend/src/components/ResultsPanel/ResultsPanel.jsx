@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { formatCurrency, formatPercent, calcExpectedReturn, calcFutureValue } from '../../capm';
-import { RISK_FREE_RATE, FUNDS } from '../../funds';
+import { formatCurrency, formatPercent, calcFutureValue } from '../../capm';
+import { calculateFutureValue } from '../../api/mutualFunds';
 import styles from './ResultsPanel.module.css';
 
 const W = 800;   // viewBox width
@@ -99,7 +99,9 @@ function XAxis({ totalYears, minVal, maxVal }) {
   );
 }
 function GrowthChart({ result }) {
-  const { principal, years, expectedReturn, futureValue, fund } = result;
+  const { principal, years, expected_return_rate, future_value, fund_name } = result;
+  const expectedReturn = expected_return_rate;
+  const futureValue = future_value;
   const points = generatePoints(principal, expectedReturn, years);
 
   const minVal = principal * 0.95;
@@ -116,7 +118,7 @@ function GrowthChart({ result }) {
 
   return (
     <div className={styles.chartWrap}>
-      <div className={styles.chartLabel}>Growth Curve — {fund.name}</div>
+      <div className={styles.chartLabel}>Growth Curve — {fund_name}</div>
       <svg viewBox={`0 0 ${W} ${H}`} className={styles.svg}>
         <defs>
           <linearGradient id="goldFill" x1="0" y1="0" x2="0" y2="1">
@@ -148,12 +150,11 @@ function GrowthChart({ result }) {
 }
 
 function ComparisonChart({ result, compareFund }) {
-  const { principal, years, expectedReturn, fund } = result;
+  const { principal, years, expected_return_rate, future_value, fund_name } = result;
+  const compareReturn = compareFund.expected_return_rate;
+  const compareFV = compareFund.future_value;
 
-  const compareReturn = calcExpectedReturn(compareFund.beta);
-  const compareFV     = calcFutureValue(principal, compareReturn, years);
-
-  const pts1 = generatePoints(principal, expectedReturn, years);
+  const pts1 = generatePoints(principal, expected_return_rate, years);
   const pts2 = generatePoints(principal, compareReturn, years);
 
   const allValues = [...pts1, ...pts2].map(p => p.value);
@@ -167,7 +168,7 @@ function ComparisonChart({ result, compareFund }) {
   const shadePoly = buildShadePolygon(pts1, pts2, years, minVal, maxVal);
 
   // Determine which fund performs better at end
-  const fund1Better = result.futureValue >= compareFV;
+  const fund1Better = future_value >= compareFV;
 
   return (
     <div className={styles.chartWrap}>
@@ -175,12 +176,12 @@ function ComparisonChart({ result, compareFund }) {
       <div className={styles.legend}>
         <div className={styles.legendItem}>
           <span className={styles.legendDot} style={{ background: 'var(--gold)' }} />
-          <span>{fund.name}</span>
-          <span className={styles.legendValue}>{formatCurrency(result.futureValue)}</span>
+          <span>{fund_name}</span>
+          <span className={styles.legendValue}>{formatCurrency(future_value)}</span>
         </div>
         <div className={styles.legendItem}>
           <span className={styles.legendDot} style={{ background: 'var(--green)' }} />
-          <span>{compareFund.name}</span>
+          <span>{compareFund.fund_name}</span>
           <span className={styles.legendValue}>{formatCurrency(compareFV)}</span>
         </div>
       </div>
@@ -213,21 +214,31 @@ function ComparisonChart({ result, compareFund }) {
           strokeLinecap="round"
           strokeDasharray="6 3"
         />
-        <circle cx={toX(years, years)} cy={toY(result.futureValue, minVal, maxVal)} r="5" fill="var(--gold)" />
+        <circle cx={toX(years, years)} cy={toY(future_value, minVal, maxVal)} r="5" fill="var(--gold)" />
         <circle cx={toX(years, years)} cy={toY(compareFV, minVal, maxVal)} r="5" fill="var(--green)" />
       </svg>
       <div className={styles.diffCallout}>
         <span className={styles.diffLabel}>Difference at {years} years</span>
         <span className={`${styles.diffValue} ${fund1Better ? styles.positive : styles.negative}`}>
-          {fund1Better ? '+' : '-'}{formatCurrency(Math.abs(result.futureValue - compareFV))}
-          {' '}in favor of {fund1Better ? fund.name : compareFund.name}
+          {fund1Better ? '+' : '-'}{formatCurrency(Math.abs(future_value - compareFV))}
+          {' '}in favor of {fund1Better ? fund_name : compareFund.fund_name}
         </span>
       </div>
     </div>
   );
 }
-export default function ResultsPanel({ result }) {
-  const { fund, principal, years, expectedReturn, futureValue, gain } = result;
+export default function ResultsPanel({ result, funds }) {
+  const {
+    ticker,
+    fund_name,
+    principal,
+    years,
+    beta,
+    risk_free_rate,
+    expected_return_rate,
+    future_value,
+  } = result;
+  const gain = future_value - principal;
 
   const fillRef  = useRef(null);
   const panelRef = useRef(null);
@@ -235,16 +246,19 @@ export default function ResultsPanel({ result }) {
   // State for the comparison feature
   const [comparing, setComparing]     = useState(false);
   const [compareFund, setCompareFund] = useState(null);
+  const [compareLoading, setCompareLoading] = useState(false);
+  const [compareError, setCompareError] = useState('');
   useEffect(() => {
     setTimeout(() => {
       setComparing(false);
       setCompareFund(null);
+      setCompareError('');
     }, 0);
   }, [result]);
 
   // Animate progress bar and scroll into view
   useEffect(() => {
-    const gainPct = Math.min(((futureValue - principal) / futureValue) * 100, 88);
+    const gainPct = Math.min((gain / future_value) * 100, 88);
     setTimeout(() => {
       if (fillRef.current) fillRef.current.style.width = `${gainPct}%`;
     }, 100);
@@ -254,7 +268,34 @@ export default function ResultsPanel({ result }) {
   const gainPositive = gain >= 0;
 
   // Funds available for comparison — exclude the currently selected fund
-  const comparisonFunds = FUNDS.filter(f => f.ticker !== fund.ticker);
+  const comparisonFunds = funds.filter(f => f.ticker !== ticker);
+
+  async function handleCompareChange(event) {
+    const nextTicker = event.target.value;
+
+    if (!nextTicker) {
+      setCompareFund(null);
+      setCompareError('');
+      return;
+    }
+
+    setCompareLoading(true);
+    setCompareError('');
+
+    try {
+      const comparison = await calculateFutureValue({
+        ticker: nextTicker,
+        principal,
+        years,
+      });
+      setCompareFund(comparison);
+    } catch (err) {
+      setCompareFund(null);
+      setCompareError(err.message || 'Failed to compare funds.');
+    } finally {
+      setCompareLoading(false);
+    }
+  }
 
   return (
     <div className={styles.panel} ref={panelRef}>
@@ -264,25 +305,25 @@ export default function ResultsPanel({ result }) {
         <div>
           <p className={styles.resultLabel}>Future Portfolio Value</p>
           <p className={`${styles.resultAmount} ${gainPositive ? styles.positive : styles.negative}`}>
-            {formatCurrency(futureValue)}
+            {formatCurrency(future_value)}
           </p>
-          <p className={styles.fundName}>{fund.name} · {years} yr{years !== 1 ? 's' : ''}</p>
+          <p className={styles.fundName}>{fund_name} · {years} yr{years !== 1 ? 's' : ''}</p>
         </div>
       </div>
 
       <div className={styles.metaGrid}>
         <div className={styles.metaItem}>
           <span className={styles.metaLabel}>Beta (β)</span>
-          <span className={styles.metaValue}>{fund.beta.toFixed(2)}</span>
+          <span className={styles.metaValue}>{beta.toFixed(2)}</span>
         </div>
         <div className={styles.metaItem}>
           <span className={styles.metaLabel}>Risk-Free Rate</span>
-          <span className={styles.metaValue}>{formatPercent(RISK_FREE_RATE)}</span>
+          <span className={styles.metaValue}>{formatPercent(risk_free_rate)}</span>
         </div>
         <div className={styles.metaItem}>
           <span className={styles.metaLabel}>Expected Return</span>
           <span className={`${styles.metaValue} ${styles.positive}`}>
-            {formatPercent(expectedReturn)}
+            {formatPercent(expected_return_rate)}
           </span>
         </div>
         <div className={styles.metaItem}>
@@ -303,7 +344,7 @@ export default function ResultsPanel({ result }) {
         </div>
         <div className={styles.progressAmounts}>
           <span>{formatCurrency(principal)}</span>
-          <span className={styles.positive}>{formatCurrency(futureValue)}</span>
+          <span className={styles.positive}>{formatCurrency(future_value)}</span>
         </div>
       </div>
       <GrowthChart result={result} />
@@ -322,16 +363,19 @@ export default function ResultsPanel({ result }) {
           <select
             className={styles.compareSelect}
             value={compareFund?.ticker || ''}
-            onChange={e => {
-              const f = comparisonFunds.find(f => f.ticker === e.target.value);
-              setCompareFund(f || null);
-            }}
+            onChange={handleCompareChange}
           >
             <option value="">Select a fund to compare...</option>
             {comparisonFunds.map(f => (
               <option key={f.ticker} value={f.ticker}>{f.name} ({f.ticker})</option>
             ))}
           </select>
+          {compareLoading && (
+            <p className={styles.compareStatus}>Loading comparison...</p>
+          )}
+          {compareError && (
+            <p className={styles.compareError}>{compareError}</p>
+          )}
           {compareFund && (
             <ComparisonChart result={result} compareFund={compareFund} />
           )}

@@ -8,7 +8,7 @@ React + ShadCN for UI Library
 
 Backend:
 
-Fastapi and postgres
+Fastapi
 
 
 # Mutual Fund Calculator Backend Contract

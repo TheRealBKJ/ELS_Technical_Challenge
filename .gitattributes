@@ -1,0 +1,10 @@
+# Ignore generated / irrelevant files from language stats
+*.json linguist-generated=true
+*.lock linguist-generated=true
+*.min.js linguist-generated=true
+*.pyc linguist-generated=true
+__pycache__/ linguist-generated=true
+venv/ linguist-generated=true
+.env/ linguist-generated=true
+build/ linguist-generated=true
+dist/ linguist-generated=true

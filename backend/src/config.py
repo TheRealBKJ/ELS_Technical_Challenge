@@ -1,3 +1,5 @@
+import os
+
 # backend/config.py
 
 # 10-year US Treasury yield (risk-free rate)
@@ -10,3 +12,6 @@ NEWTON_BETA_URL = "https://api.newtonanalytics.com/stock-beta/"
 NEWTON_INDEX = "^GSPC"
 NEWTON_INTERVAL = "1mo"
 NEWTON_OBSERVATIONS = 12
+
+
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5.2")

@@ -31,20 +31,26 @@ def get_beta(ticker:str) -> float:
             detail="Received an invalid response from Newton Analytics API."
         ) from exc
 
-    if "data" not in data or "beta" not in data["data"]:
+    if "data" not in data:
         raise HTTPException(
             status_code=404,
             detail=f"Beta not available for ticker '{ticker}'."
         )
+
+    beta_data = data["data"]
+
+    if isinstance(beta_data, dict):
+        beta_value = beta_data.get("beta")
+    else:
+        beta_value = beta_data
     
     try:
-        return float(data["data"]["beta"])
+        return float(beta_value)
     except (ValueError, TypeError):
         raise HTTPException(
             status_code=500,
             detail="Invalid beta format received from API."
         )
-
 
 
 

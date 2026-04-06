@@ -1,12 +1,10 @@
 import React from 'react';
-import { FUNDS, RISK_FREE_RATE, MARKET_RETURN } from '../../funds';
-import { calcExpectedReturn, formatPercent } from '../../capm';
 import styles from './FundSelector.module.css';
 
-export default function FundSelector({ selectedFund, onSelect }) {
+export default function FundSelector({ funds, loading, selectedFund, onSelect }) {
   function handleChange(e) {
     const ticker = e.target.value;
-    const fund   = FUNDS.find(f => f.ticker === ticker) || null;
+    const fund   = funds.find(f => f.ticker === ticker) || null;
     onSelect(fund);
   }
 
@@ -25,9 +23,12 @@ export default function FundSelector({ selectedFund, onSelect }) {
             className={styles.select}
             value={selectedFund?.ticker || ''}
             onChange={handleChange}
+            disabled={loading || funds.length === 0}
           >
-            <option value="">— Choose a fund —</option>
-            {FUNDS.map(fund => (
+            <option value="">
+              {loading ? 'Loading funds...' : '— Choose a fund —'}
+            </option>
+            {funds.map(fund => (
               <option key={fund.ticker} value={fund.ticker}>
                 {fund.name} ({fund.ticker})
               </option>
@@ -42,9 +43,7 @@ export default function FundSelector({ selectedFund, onSelect }) {
             <>
               <span className={styles.badgeName}>{selectedFund.name}</span>
               <span className={styles.badgeMeta}>
-                β {selectedFund.beta.toFixed(2)}
-                &nbsp;·&nbsp;
-                E(r) {formatPercent(calcExpectedReturn(selectedFund.beta))}
+                {selectedFund.ticker}
               </span>
             </>
           ) : (
@@ -57,16 +56,16 @@ export default function FundSelector({ selectedFund, onSelect }) {
 
       <div className={styles.rateInfo}>
         <div className={styles.rateRow}>
-          <span className={styles.rateKey}>Risk-Free Rate (Rf)</span>
-          <span className={styles.rateVal}>{formatPercent(RISK_FREE_RATE)}</span>
+          <span className={styles.rateKey}>Fund Source</span>
+          <span className={styles.rateVal}>FastAPI backend</span>
         </div>
         <div className={styles.rateRow}>
-          <span className={styles.rateKey}>Market Return (Rm)</span>
-          <span className={styles.rateVal}>{formatPercent(MARKET_RETURN)}</span>
+          <span className={styles.rateKey}>Funds Available</span>
+          <span className={styles.rateVal}>{funds.length}</span>
         </div>
         <div className={styles.rateRow}>
-          <span className={styles.rateKey}>Model</span>
-          <span className={styles.rateFormula}>E(r) = Rf + β(Rm − Rf)</span>
+          <span className={styles.rateKey}>Calculation Source</span>
+          <span className={styles.rateFormula}>Beta + return rate come from backend APIs</span>
         </div>
       </div>
     </div>

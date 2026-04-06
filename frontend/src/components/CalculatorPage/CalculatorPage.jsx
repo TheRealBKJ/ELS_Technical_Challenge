@@ -1,38 +1,69 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import FundSelector from '../FundSelector/FundSelector';
 import InvestmentForm from '../InvestmentForm/InvestmentForm';
 import ResultsPanel from '../ResultsPanel/ResultsPanel';
-import { calcExpectedReturn, calcFutureValue } from '../../capm';
+import { calculateFutureValue, fetchMutualFunds } from '../../api/mutualFunds';
 import styles from './CalculatorPage.module.css';
 
 export default function CalculatorPage() {
+  const [funds, setFunds]                 = useState([]);
+  const [fundsLoading, setFundsLoading]   = useState(true);
   const [selectedFund, setSelectedFund] = useState(null);
   const [amount, setAmount]             = useState(10000);
   const [years, setYears]               = useState(10);
   const [result, setResult]             = useState(null);
   const [loading, setLoading]           = useState(false);
+  const [error, setError]               = useState('');
 
-  function handleCalculate() {
+  useEffect(() => {
+    let active = true;
+
+    async function loadFunds() {
+      setFundsLoading(true);
+      setError('');
+
+      try {
+        const data = await fetchMutualFunds();
+        if (!active) return;
+
+        setFunds(data);
+      } catch (err) {
+        if (!active) return;
+        setError(err.message || 'Failed to load mutual funds.');
+      } finally {
+        if (active) {
+          setFundsLoading(false);
+        }
+      }
+    }
+
+    loadFunds();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function handleCalculate() {
     if (!selectedFund || !amount || amount < 100) return;
 
     setLoading(true);
+    setError('');
+    setResult(null);
 
-    // Simulate async API call delay (replace with real fetch when backend is ready)
-    setTimeout(() => {
-      const expectedReturn = calcExpectedReturn(selectedFund.beta);
-      const futureValue    = calcFutureValue(amount, expectedReturn, years);
-
-      setResult({
-        fund:           selectedFund,
-        principal:      amount,
+    try {
+      const data = await calculateFutureValue({
+        ticker: selectedFund.ticker,
+        principal: Number(amount),
         years,
-        expectedReturn,
-        futureValue,
-        gain:           futureValue - amount,
       });
 
+      setResult(data);
+    } catch (err) {
+      setError(err.message || 'Failed to calculate future value.');
+    } finally {
       setLoading(false);
-    }, 600);
+    }
   }
 
   return (
@@ -48,6 +79,8 @@ export default function CalculatorPage() {
 
       <div className={styles.grid}>
         <FundSelector
+          funds={funds}
+          loading={fundsLoading}
           selectedFund={selectedFund}
           onSelect={setSelectedFund}
         />
@@ -62,8 +95,17 @@ export default function CalculatorPage() {
           canCalculate={!!selectedFund && amount >= 100}
         />
 
+        {error && (
+          <div className={styles.errorBanner}>
+            {error}
+          </div>
+        )}
+
         {result && (
-          <ResultsPanel result={result} />
+          <ResultsPanel
+            result={result}
+            funds={funds}
+          />
         )}
       </div>
     </div>

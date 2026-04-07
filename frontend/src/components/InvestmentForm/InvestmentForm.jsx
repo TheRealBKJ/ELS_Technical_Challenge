@@ -13,9 +13,18 @@ export default function InvestmentForm({
   const [amountError, setAmountError] = useState('');
 
   function handleAmountChange(e) {
-    const val = parseFloat(e.target.value);
-    onAmountChange(val);
-    if (val < 100) {
+    const rawValue = e.target.value;
+
+    if (rawValue === '') {
+      onAmountChange('');
+      setAmountError('Minimum investment is $100');
+      return;
+    }
+
+    const val = parseFloat(rawValue);
+    onAmountChange(Number.isNaN(val) ? '' : val);
+
+    if (Number.isNaN(val) || val < 100) {
       setAmountError('Minimum investment is $100');
     } else {
       setAmountError('');
@@ -47,7 +56,7 @@ export default function InvestmentForm({
             min="100"
             max="10000000"
             step="100"
-            value={amount}
+            value={amount === '' ? '' : amount}
             onChange={handleAmountChange}
           />
         </div>

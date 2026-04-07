@@ -7,6 +7,10 @@ const W = 800;   // viewBox width
 const H = 320;   // viewBox height
 const PAD = { top: 24, right: 24, bottom: 48, left: 72 };
 
+function getProjectedRate(result) {
+  return result.risk_free_rate + result.beta * (result.expected_return_rate - result.risk_free_rate);
+}
+
 // Generate an array of { year, value } data points for a fund
 function generatePoints(principal, expectedReturn, totalYears) {
   return Array.from({ length: totalYears + 1 }, (_, yr) => ({
@@ -99,8 +103,8 @@ function XAxis({ totalYears, minVal, maxVal }) {
   );
 }
 function GrowthChart({ result }) {
-  const { principal, years, expected_return_rate, future_value, fund_name } = result;
-  const expectedReturn = expected_return_rate;
+  const { principal, years, future_value, fund_name } = result;
+  const expectedReturn = getProjectedRate(result);
   const futureValue = future_value;
   const points = generatePoints(principal, expectedReturn, years);
 
@@ -150,11 +154,12 @@ function GrowthChart({ result }) {
 }
 
 function ComparisonChart({ result, compareFund }) {
-  const { principal, years, expected_return_rate, future_value, fund_name } = result;
-  const compareReturn = compareFund.expected_return_rate;
+  const { principal, years, future_value, fund_name } = result;
+  const baseReturn = getProjectedRate(result);
+  const compareReturn = getProjectedRate(compareFund);
   const compareFV = compareFund.future_value;
 
-  const pts1 = generatePoints(principal, expected_return_rate, years);
+  const pts1 = generatePoints(principal, baseReturn, years);
   const pts2 = generatePoints(principal, compareReturn, years);
 
   const allValues = [...pts1, ...pts2].map(p => p.value);

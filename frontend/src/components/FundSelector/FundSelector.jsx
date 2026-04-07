@@ -1,4 +1,5 @@
 import React from 'react';
+import { RISK_FREE_RATE } from '../../funds';
 import styles from './FundSelector.module.css';
 
 export default function FundSelector({ funds, loading, selectedFund, onSelect }) {
@@ -48,7 +49,7 @@ export default function FundSelector({ funds, loading, selectedFund, onSelect })
             </>
           ) : (
             <span className={styles.badgePlaceholder}>
-              Select a fund to view details
+              Choose a mutual fund to begin
             </span>
           )}
         </div>
@@ -56,16 +57,16 @@ export default function FundSelector({ funds, loading, selectedFund, onSelect })
 
       <div className={styles.rateInfo}>
         <div className={styles.rateRow}>
-          <span className={styles.rateKey}>Fund Source</span>
-          <span className={styles.rateVal}>FastAPI backend</span>
-        </div>
-        <div className={styles.rateRow}>
-          <span className={styles.rateKey}>Funds Available</span>
+          <span className={styles.rateKey}>Available Funds</span>
           <span className={styles.rateVal}>{funds.length}</span>
         </div>
         <div className={styles.rateRow}>
-          <span className={styles.rateKey}>Calculation Source</span>
-          <span className={styles.rateFormula}>Beta + return rate come from backend APIs</span>
+          <span className={styles.rateKey}>Risk-Free Rate</span>
+          <span className={styles.rateVal}>{(RISK_FREE_RATE * 100).toFixed(2)}%</span>
+        </div>
+        <div className={styles.rateRow}>
+          <span className={styles.rateKey}>Calculation Method</span>
+          <span className={styles.rateFormula}>Future value estimate based on beta, recent performance, and CAPM assumptions</span>
         </div>
       </div>
     </div>

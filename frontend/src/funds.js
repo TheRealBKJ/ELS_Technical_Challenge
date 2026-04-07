@@ -12,5 +12,5 @@ export const FUNDS = [
 ];
 
 // CAPM constants (hardcoded).
-export const RISK_FREE_RATE = 0.045;
+export const RISK_FREE_RATE = 0.0408;
 export const MARKET_RETURN  = 0.105;
